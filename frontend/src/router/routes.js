@@ -31,6 +31,8 @@ const routes = [
       { path: 'stats', name: 'stats', component: () => import('pages/stats.vue') },
       { path: 'table', name: 'table', component: () => import('pages/AddUser.vue') },
       { path: 'index', name: 'index', component: () => import('pages/IndexPage.vue') },
+      { path: 'budget', name: 'budget', component: () => import('pages/BudgetPage.vue') },
+      { path: 'ai-chat', name: 'ai-chat', component: () => import('pages/AiChat.vue') },
       {
         path: 'categories',
         name: 'categories',
@@ -38,8 +40,8 @@ const routes = [
         // meta: { requiresAuth: true }
       },
       {
-        path: 'SettingsPage',
-        name: 'settings',
+        path: 'setting',
+        name: 'setting',
         component: () => import('pages/SettingsPage.vue'), // 👈 complete Settings page
       },
       { path: 'account', name: 'account', component: () => import('pages/account.vue') },

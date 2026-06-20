@@ -8,10 +8,11 @@ from django.contrib.auth.models import User
 from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import Expense, ExpenseGroup, Category, Budget
+from .models import Expense, ExpenseGroup, Category, Budget, UserSettings
+from django.contrib.auth.hashers import check_password
 from .serializers import (
     ExpenseSerializer, ExpenseGroupSerializer, 
-    CategorySerializer, BudgetSerializer, UserSerializer
+    CategorySerializer, BudgetSerializer, UserSettingsSerializer, UserSerializer
 )
 
 @api_view(['POST'])
@@ -55,22 +56,41 @@ class ExpenseViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Expense.objects.filter(
-            Q(user=self.request.user) | 
+            Q(user=self.request.user) |
             Q(group__members=self.request.user)
         ).distinct()
-        
-        # Filter by group if specified
+
+        # Group filter
         group_id = self.request.query_params.get('group')
         if group_id:
             queryset = queryset.filter(group_id=group_id)
-        
-        # Filter by date range
+
+        # Date range filter
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
         if start_date and end_date:
             queryset = queryset.filter(date__range=[start_date, end_date])
-        
+
+        # Type filter (income / expense)
+        expense_type = self.request.query_params.get('type')
+        if expense_type in ['income', 'expense']:
+            queryset = queryset.filter(expense_type=expense_type)
+
+        # Category filter
+        category = self.request.query_params.get('category')
+        if category:
+            queryset = queryset.filter(category__name__iexact=category)
+
+        # Search filter
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(description__icontains=search) |
+                Q(category__name__icontains=search)
+            )
+
         return queryset
+
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -176,3 +196,32 @@ class BudgetViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class UserSettingsViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        # Return current user's settings
+        settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
+        serializer = UserSettingsSerializer(settings_obj)
+        return Response(serializer.data)
+
+    def partial_update(self, request, pk=None):
+        # Accepts partial fields. pk unused (we use current user).
+        settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
+        serializer = UserSettingsSerializer(settings_obj, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def upload_avatar(self, request):
+        settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
+        avatar_file = request.FILES.get('avatar')
+        if not avatar_file:
+            return Response({'error': 'No file uploaded'}, status=status.HTTP_400_BAD_REQUEST)
+        settings_obj.avatar = avatar_file
+        settings_obj.save()
+        serializer = UserSettingsSerializer(settings_obj)
+        return Response(serializer.data)

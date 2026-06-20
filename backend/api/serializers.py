@@ -1,13 +1,41 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Expense, ExpenseGroup, Category, Budget
+from django.contrib.auth.hashers import make_password, check_password
+from .models import UserSettings
+
+
+
+class UserSettingsSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = UserSettings
+        exclude = ('id', 'user',)  # user set in view
+
+    def update(self, instance, validated_data):
+        # Handle PIN hashing separately
+        pin = validated_data.pop('app_lock_pin', None)
+        if pin is not None:
+            # Hash PIN with Django hasher
+            instance.app_lock_pin_hash = make_password(pin)
+            instance.app_lock_enabled = True if pin else False
+
+        # Normal fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+    # Optional: support setting PIN via a dedicated field
+    app_lock_pin = serializers.CharField(write_only=True, required=False, allow_null=True)
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'password')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'password', 'settings')
 
     def create(self, validated_data):
         user = User.objects.create_user(

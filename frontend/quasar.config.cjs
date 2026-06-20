@@ -49,7 +49,7 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
-        vueRouterMode: 'hash',
+          vueRouterMode: 'hash',
         legacy: true,
         sassLoaderOptions: {
     sassOptions: {

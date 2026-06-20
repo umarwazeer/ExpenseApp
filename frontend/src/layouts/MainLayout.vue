@@ -1,157 +1,168 @@
-Here is the **Clean, Professional, and Compact** version.
-
-### Changes made based on your request:
-1.  **Removed Animation:** The logo is now static (no floating/bouncing).
-2.  **Compact Sidebar Header:** Removed the large colorful box. Now it is a simple, professional row with **Logo + Title**.
-3.  **Space Saving:** It takes up much less space, leaving more room for your menu items.
-
-```template
 <template>
   <q-layout view="lHh Lpr lFf" class="bg-gray-50 font-sans">
 
-    <!-- ===========================
-         🔹 HEADER (Top Bar)
-    ============================ -->
-    <q-header elevated class="backdrop-blur-md" 
-              style="background: linear-gradient(135deg, #0891b2 0%, #0ea5e9 50%, #d946ef 100%);">
-      <q-toolbar class="q-py-xs">
-        
-        <!-- Left: Menu Button + Logo -->
-        <div class="flex items-center q-gutter-sm">
-          <q-btn flat dense round icon="menu" @click="toggleLeftDrawer" 
-                 class="hover:bg-white/20 rounded-xl transition-all duration-200" />
-          
-          <!-- Header Title (Only visible on Desktop) -->
-          <div class="hidden sm:flex items-center gap-2 ml-2">
-             <img :src="appLogo" class="w-6 h-6 brightness-200 filter" style="filter: brightness(0) invert(1);" />
-             <span class="text-lg font-bold tracking-wide">FineTracker</span>
-          </div>
-        </div>
+    <!-- ================= SIDEBAR OVERLAY (MOBILE) ================= -->
+    <transition name="fade">
+      <div
+        v-if="mobileSidebarOpen"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+        @click="mobileSidebarOpen = false"
+      />
+    </transition>
 
-        <q-space />
-
-        <!-- Right: User Actions -->
-        <div class="flex items-center gap-2">
-          <!-- Notifications -->
-          <q-btn flat round dense icon="notifications" class="hover:bg-white/20 rounded-xl">
-             <q-badge color="red-500" floating rounded mini />
-          </q-btn>
-          
-          <!-- Profile Dropdown -->
-          <q-btn flat no-caps class="hover:bg-white/20 rounded-xl pl-1 pr-2">
-            <div class="flex items-center gap-2">
-              <q-avatar size="30px" class="border border-white/50">
-                <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" />
-              </q-avatar>
-              <span class="hidden xs text-sm font-semibold">Umar</span>
-            </div>
-            
-            <q-menu auto-close class="rounded-xl shadow-xl mt-2 border border-gray-100">
-              <q-list style="min-width: 150px">
-                <q-item clickable class="hover:bg-cyan-50">
-                  <q-item-section>Profile</q-item-section>
-                </q-item>
-                <q-item clickable class="text-red-600 hover:bg-red-50" @click="showLogoutDialog = true">
-                  <q-item-section>Logout</q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
-        </div>
-      </q-toolbar>
-    </q-header>
-
-    <!-- ===========================
-         🔹 SIDEBAR (DRAWER)
-    ============================ -->
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      :width="250"
-      class="bg-white"
+    <!-- ================= SIDEBAR ================= -->
+    <aside
+      class="fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200
+             transform transition-transform duration-300
+             lg:translate-x-0 lg:static"
+      :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
     >
       <q-scroll-area class="fit">
-        
-        <!-- 🔸 SIMPLE SIDEBAR HEADER -->
-        <div class="flex items-center gap-3 q-px-lg q-py-md border-b border-gray-100">
-           <div class="w-9 h-9 bg-cyan-50 rounded-lg flex items-center justify-center border border-cyan-100">
-             <img :src="appLogo" class="w-6 h-6" alt="Logo" />
-           </div>
-           <div class="flex flex-col">
-             <span class="text-lg font-bold text-gray-800 leading-none">FineTracker</span>
-             <span class="text-[11px] text-gray-400 font-medium mt-1">Expense Manager</span>
-           </div>
+
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-100">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg">
+              <TrendingUp class="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div class="text-lg font-bold text-gray-900">DailyKhata</div>
+              <div class="text-[11px] text-gray-400">Expense Manager</div>
+            </div>
+          </div>
+
+          <button class="lg:hidden" @click="mobileSidebarOpen = false">
+            <X class="w-5 h-5 text-gray-500" />
+          </button>
         </div>
 
-        <!-- 🔸 Menu Items -->
-        <q-list padding class="q-mt-sm text-gray-600">
-          
-          <q-item-label header class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2 q-mb-xs">
+        <!-- Menu -->
+        <nav class="p-3">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">
             Main Menu
-          </q-item-label>
+          </p>
 
-          <q-item 
-            v-for="link in menuLinks" 
+          <router-link
+            v-for="link in menuLinks"
             :key="link.title"
-            clickable 
-            v-ripple 
             :to="link.to"
-            active-class="text-cyan-700 bg-cyan-50 border-r-4 border-cyan-500 font-semibold"
-            class="mx-3 rounded-lg mb-1 hover:bg-gray-50 transition-colors"
+            @click="mobileSidebarOpen = false"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium mb-1 transition-all"
+            :class="isActive(link.to)
+              ? 'bg-teal-50 text-teal-700 border-r-4 border-teal-600'
+              : 'text-gray-600 hover:bg-gray-50'"
           >
-            <q-item-section avatar class="min-w-[40px]">
-              <q-icon :name="link.icon" size="20px" />
-            </q-item-section>
-            <q-item-section class="text-[14px]">
-              {{ link.title }}
-            </q-item-section>
-          </q-item>
+            <component :is="link.icon" class="w-5 h-5" />
+            {{ link.title }}
+            <span
+              v-if="link.title === 'AI Assistant'"
+              class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 font-semibold"
+            >
+              AI
+            </span>
+          </router-link>
 
-          <q-separator class="my-4 mx-6 bg-gray-100" />
+          <q-separator class="my-4" />
 
-          <q-item-label header class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-2 q-mb-xs">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">
             System
-          </q-item-label>
+          </p>
 
-          <q-item clickable v-ripple to="/SettingsPage" active-class="text-cyan-700 bg-cyan-50" class="mx-3 rounded-lg mb-1">
-            <q-item-section avatar class="min-w-[40px]"><q-icon name="settings" size="20px"/>
-            </q-item-section>
-            <q-item-section class="text-[14px]">Settings</q-item-section>
-          </q-item>
+          <router-link
+            to="/setting"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"
+          >
+            <Settings class="w-5 h-5" />
+            Settings
+          </router-link>
 
-          <q-item clickable v-ripple @click="showLogoutDialog = true" class="mx-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
-            <q-item-section avatar class="min-w-[40px]"><q-icon name="logout" size="20px"/></q-item-section>
-            <q-item-section class="text-[14px]">Logout</q-item-section>
-          </q-item>
-        </q-list>
+          <button
+            @click="showLogoutDialog = true"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50"
+          >
+            <LogOut class="w-5 h-5" />
+            Logout
+          </button>
+        </nav>
 
       </q-scroll-area>
-    </q-drawer>
+    </aside>
 
-    <!-- ===========================
-         🔹 PAGE CONTENT
-    ============================ -->
+    <!-- ================= HEADER ================= -->
+   <header class="sticky top-0 z-30 bg-gradient-to-r from-teal-700 to-teal-600">
+      <div class="flex items-center justify-between h-14 px-4 text-white">
+
+        <div class="flex items-center gap-3">
+          <button
+            class="lg:hidden p-2 rounded-md hover:bg-white/10"
+            @click="mobileSidebarOpen = true"
+          >
+            <Menu class="w-5 h-5" />
+          </button>
+
+          <div>
+            <div class="text-lg font-bold">DailyKhata     </div>
+            <div class="text-[10px] opacity-80 hidden sm:block">
+              {{ today }}
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button class="relative p-2 rounded-md hover:bg-white/10">
+            <Bell class="w-5 h-5" />
+            <span class="absolute top-2 right-2 w-2 h-2 bg-red-400 rounded-full"></span>
+          </button>
+
+          <button class="p-2 rounded-md hover:bg-white/10">
+            <Moon class="w-5 h-5" />
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ================= PAGE CONTENT ================= -->
     <q-page-container class="bg-gray-50">
-      <router-view />
+      <router-view class="h-full flex flex-col" />
     </q-page-container>
 
-    <!-- ===========================
-         🔹 LOGOUT MODAL (Unchanged)
-    ============================ -->
-    <q-dialog v-model="showLogoutDialog" backdrop-filter="blur(4px)">
-      <q-card class="rounded-2xl shadow-2xl p-4" style="width: 350px">
-        <q-card-section class="text-center">
-          <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3 text-red-500">
-            <q-icon name="logout" size="28px" />
+    <!-- ================= BOTTOM NAV (MOBILE) ================= -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t lg:hidden">
+      <div class="flex items-center justify-around h-16">
+
+        <router-link
+          v-for="item in bottomNav"
+          :key="item.label"
+          :to="item.to"
+          class="flex flex-col items-center gap-1 flex-1 py-2 transition"
+          :class="isActive(item.to) ? 'text-teal-600' : 'text-gray-400'"
+        >
+          <div class="p-1.5 rounded-xl" :class="isActive(item.to) && 'bg-teal-100'">
+            <component :is="item.icon" class="w-5 h-5" />
           </div>
-          <div class="text-h6 font-bold text-gray-800">Log Out?</div>
-          <div class="text-sm text-gray-500 mt-1">Are you sure you want to sign out?</div>
+          <span class="text-[10px] font-medium">{{ item.label }}</span>
+        </router-link>
+
+      </div>
+    </nav>
+
+    <!-- ================= LOGOUT DIALOG ================= -->
+    <q-dialog v-model="showLogoutDialog">
+      <q-card class="rounded-2xl p-4 w-[320px]">
+        <q-card-section class="text-center">
+          <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <LogOut class="w-7 h-7 text-red-500" />
+          </div>
+          <div class="text-lg font-bold">Log out?</div>
+          <div class="text-sm text-gray-500 mt-1">
+            Are you sure you want to sign out?
+          </div>
         </q-card-section>
 
         <q-card-actions align="center" class="gap-3">
-          <q-btn flat label="Cancel" color="grey-8" v-close-popup class="bg-gray-100 flex-1 rounded-lg" no-caps />
-          <q-btn flat label="Logout" color="white" class="bg-red-600 flex-1 rounded-lg" @click="handleLogout" no-caps />
+          <q-btn flat label="Cancel" v-close-popup class="bg-gray-100 rounded-lg" />
+          <q-btn flat label="Logout" class="bg-red-600 text-white rounded-lg" @click="handleLogout" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -159,58 +170,79 @@ Here is the **Clean, Professional, and Compact** version.
   </q-layout>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue'
-import { useQuasar } from 'quasar'
-import { useAuthStore } from 'src/stores/auth'
-import { useRouter } from 'vue-router'
+<script setup>
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+import { useAuthStore } from "src/stores/auth";
 
-export default defineComponent({
-  name: 'MainLayout',
+import {
+  Menu,
+  Bell,
+  Moon,
+  TrendingUp,
+  LayoutGrid,
+  Receipt,
+  BarChart3,
+  PieChart,
+  Wallet,
+  Settings,
+  LogOut,
+  X,
+  Home,
+  User,
+  Bot,
 
-  setup() {
-    const $q = useQuasar()
-    const auth = useAuthStore()
-    const router = useRouter()
-    
-    const leftDrawerOpen = ref(false)
-    const showLogoutDialog = ref(false)
+} from "lucide-vue-next";
 
-    // 🔹 Using a clean SVG Logo (Chart/Finance)
-    const appLogo = 'https://www.svgrepo.com/show/428656/business-chart-finance.svg'
+const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
+const $q = useQuasar();
 
-    const menuLinks = [
-      { title: 'Dashboard', icon: 'grid_view', to: '/' },
-      { title: 'Transactions', icon: 'receipt_long', to: '/transactions' },
-      { title: 'Reports', icon: 'bar_chart', to: '/report' },
-      { title: 'Analytics', icon: 'donut_small', to: '/analytics' },
-      { title: 'My Budget', icon: 'account_balance_wallet', to: '/budget' }
-    ]
+const mobileSidebarOpen = ref(false);
+const showLogoutDialog = ref(false);
 
-    const toggleLeftDrawer = () => {
-      leftDrawerOpen.value = !leftDrawerOpen.value
-    }
+const today = new Date().toLocaleDateString("en-US", {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+});
 
-    const handleLogout = async () => {
-      showLogoutDialog.value = false
-      await auth.logout()
-      $q.notify({ type: 'positive', message: 'Logged out successfully' })
-      router.push('/auth/login')
-    }
+const menuLinks = [
+  { title: "Dashboard", to: "/", icon: LayoutGrid },
+  { title: "Transactions", to: "/transactions", icon: Receipt },
+  { title: "Reports", to: "/report", icon: BarChart3 },
+  { title: "Analytics", to: "/stats", icon: PieChart },
+  { title: "My Budget", to: "/budget", icon: Wallet },
+  { title: "AI Assistant", to: "/ai-chat", icon: Bot },
+];
 
-    return {
-      leftDrawerOpen,
-      toggleLeftDrawer,
-      showLogoutDialog,
-      handleLogout,
-      menuLinks,
-      appLogo
-    }
-  }
-})
+const bottomNav = [
+  { label: "Home", to: "/", icon: Home },
+  { label: "Stats", to: "/stats", icon: BarChart3 },
+  // { label: "AI", to: "/ai-chat", icon: Bot }, // 🤖
+  { label: "Report", to: "/report", icon: Receipt },
+  { label: "Profile", to: "/setting", icon: User },
+];
+
+const isActive = (path) => route.path === path;
+
+const handleLogout = async () => {
+  showLogoutDialog.value = false;
+  await auth.logout();
+  $q.notify({ type: "positive", message: "Logged out successfully" });
+  router.push("/auth/login");
+};
 </script>
 
 <style scoped>
-/* No animations, just clean styles */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
-```

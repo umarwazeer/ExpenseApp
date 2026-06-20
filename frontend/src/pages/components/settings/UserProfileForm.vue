@@ -1,54 +1,33 @@
 <template>
-  <q-form @submit="onSubmit" class="q-gutter-md">
-    <q-input
-      filled
-      v-model="profile.name"
-      label="Your Name *"
-      hint="Name and surname"
-      lazy-rules
-      :rules="[val => (val && val.length > 0) || 'Please type something']"
-    />
-
-    <q-input
-      filled
-      v-model="profile.email"
-      label="Your Email *"
-      type="email"
-      lazy-rules
-      :rules="[
-        val => (val && val.length > 0) || 'Please type something',
-        val => isValidEmail(val) || 'Please enter a valid email address'
-      ]"
-    />
-
-    <div>
-      <q-btn label="Save Changes" type="submit" color="primary" />
+  <q-form @submit.prevent="submit" class="q-gutter-md">
+    <q-input filled :dark="$q.dark.isActive" v-model="form.name" label="Full name" :rules="[val => !!val || 'Required']" />
+    <q-input filled :dark="$q.dark.isActive" v-model="form.email" label="Email" type="email" :rules="[emailRule]" />
+    <div class="row items-center q-gutter-sm">
+      <q-btn label="Save" color="indigo" type="submit" />
     </div>
   </q-form>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useAuthStore } from 'src/stores/auth'
+import { reactive, toRefs } from 'vue';
+import { useSettingsStore } from 'src/stores/settings';
+const store = useSettingsStore();
 
-const authStore = useAuthStore();
-
-const profile = ref({
-  name: '',
-  email: '',
+const form = reactive({
+  name: store.profile.name || '',
+  email: store.profile.email || ''
 });
 
-onMounted(() => {
-  // Load profile from the store when the component is created
-  profile.value = { ...authStore.profile };
-});
+function emailRule(val) {
+  if (!val) return true;
+  // simple email check
+  return /^\S+@\S+\.\S+$/.test(val) || 'Invalid email';
+}
 
-const onSubmit = () => {
-  authStore.updateProfile(profile.value);
-};
-
-const isValidEmail = (email) => {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
-};
+function submit() {
+  store.setProfile({ name: form.name, email: form.email });
+  // emit save event to parent
+  const { emit } = defineEmits(['save']);
+  emit('save', { name: form.name, email: form.email });
+}
 </script>

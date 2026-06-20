@@ -1,8 +1,8 @@
 <template>
   <div class="absolute-center q-pa-md" style="margin:10px 0;">
      <q-card class="my-card"
-             style="-webkit-box-shadow: -10px 0px 13px -7px #5B9773, 10px 0px 13px -7px #000000, 5px 5px 15px 5px     rgba(91,151,115,0);box-shadow: -10px 0px 13px -7px #5B9773, 10px 0px 13px -7px #5B9773, 5px 5px 15px 5px rgba(91,151,115,0);
-                    border-radius:15px;width:340px;border-bottom:11px solid #FFCB00;">
+        style="-webkit-box-shadow: -10px 0px 13px -7px #5B9773, 10px 0px 13px -7px #000000, 5px 5px 15px 5px     rgba(91,151,115,0);box-shadow: -10px 0px 13px -7px #5B9773, 10px 0px 13px -7px #5B9773, 5px 5px 15px 5px rgba(91,151,115,0);
+              border-radius:15px;width:340px;border-bottom:11px solid #FFCB00;">
 
      <i class="material-icons text-green-10" style="border-radius:100px;background:#fff;font-size:100px;margin:-35px 0 0 120px;border:solid #fff 2px;">account_circle</i>
        <q-img

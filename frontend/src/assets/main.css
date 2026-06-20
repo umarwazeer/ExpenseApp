@@ -9,3 +9,7 @@
 
 body { background: var(--bg); color: var(--text); }
 .card { background: var(--card); }
+.glass-effect {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+}

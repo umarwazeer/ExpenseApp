@@ -2,9 +2,9 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 
-import router from './router';
+import router from './router.js';
 import pinia from './stores';
-import i18n from './i18n';
+import i18n from './i18n/messages';
 
 const app = createApp(App);
 

@@ -1,32 +1,25 @@
 <template>
-  <div class="row items-center q-gutter-sm">
-    <q-icon name="light_mode" />
-    <q-toggle
-      v-model="isDarkMode"
-      @update:model-value="setTheme"
-      checked-icon="dark_mode"
-      unchecked-icon="light_mode"
-      color="primary"
-    />
-    <q-icon name="dark_mode" />
-  </div>
+  <q-toggle dense v-model="value" @update:model-value="onToggle" />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 
-const $q = useQuasar();
-const isDarkMode = ref($q.dark.isActive);
-
-onMounted(() => {
-  // Sync toggle with current theme
-  isDarkMode.value = $q.dark.isActive;
+const props = defineProps({
+  modelValue: { type: Boolean, default: false }
 });
+const emit = defineEmits(['update:modelValue']);
 
-const setTheme = (value) => {
-  $q.dark.set(value);
-  // Optional: Save preference to localStorage or backend
-  localStorage.setItem('theme', value ? 'dark' : 'light');
-};
+const $q = useQuasar();
+const value = ref(props.modelValue);
+
+watch(() => props.modelValue, (v) => value.value = v);
+
+function onToggle(v) {
+  emit('update:modelValue', v);
+  // Also apply to Quasar dark
+  $q.dark.set(v);
+  // you might also persist via store in parent
+}
 </script>

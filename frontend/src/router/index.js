@@ -1,22 +1,22 @@
 // src/router/index.js
-import { createRouter, createWebHistory } from 'vue-router';
-import routes from './routes';
-import { useAuthStore } from 'src/stores/auth';
+import { createRouter, createWebHashHistory } from 'vue-router'
+import routes from './routes'
+import { useAuthStore } from 'src/stores/auth'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(), // 🔥 FIX HERE
   routes
-});
+})
 
 // GLOBAL AUTH GUARD
 router.beforeEach((to, from, next) => {
-  const auth = useAuthStore();
+  const auth = useAuthStore()
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return next('/auth/login');
+    next('/auth/login')
+  } else {
+    next()
   }
+})  
 
-  next();
-});
-
-export default router;
+export default router

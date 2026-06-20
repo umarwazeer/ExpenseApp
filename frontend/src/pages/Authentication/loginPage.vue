@@ -6,7 +6,7 @@
         <div class="mx-auto flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl shadow-md mb-4">
           <Landmark class="text-white w-8 h-8" />
         </div>
-        <h1 class="text-3xl font-bold text-gray-900">FineTracker</h1>
+        <h1 class="text-3xl font-bold text-gray-900">DailyKhata</h1>
         <p class="text-gray-600 mt-2">
           {{ isRegister ? 'Create your account to get started' : 'Welcome back! Please sign in' }}
         </p>
