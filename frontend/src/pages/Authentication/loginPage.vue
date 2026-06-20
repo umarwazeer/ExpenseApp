@@ -150,7 +150,7 @@ const error = ref(null)
 const success = ref(null)
 const showPassword = ref(false)  // 🔹 new reactive variable
 const router = useRouter()
-  
+
 const formData = ref({
   firstName: '',
   lastName: '',
@@ -185,7 +185,7 @@ async function handleSubmit() {
         first_name: formData.value.firstName,
         last_name: formData.value.lastName,
         username: formData.value.username,
-        email: formData.value.email,      
+        email: formData.value.email,
         password: formData.value.password
       }
       response = await auth.register(userData)
@@ -204,7 +204,7 @@ async function handleSubmit() {
       if (response.success) {
         success.value = 'Login successful! Redirecting...'
         $q.notify({ type: 'positive', message: 'Login successful!' })
-        router.push({ name: 'home' }) 
+        router.push({ name: 'home' })
       } else {
         error.value = response.error || 'Invalid username or password.'
       }

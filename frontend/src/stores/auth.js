@@ -7,14 +7,14 @@ const API_URL = 'http://127.0.0.1:8000/api'
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('token') || null,
+    token: localStorage.getItem('access') || null,
     isAuthenticated: !!localStorage.getItem('token'),
   }),
 
-  getters: {
-    currentUser: (state) => state.user,
-    isLoggedIn: (state) => state.isAuthenticated,
-  },
+  // getters: {
+  //   currentUser: (state) => state.user,
+  //   isLoggedIn: (state) => state.isAuthenticated,
+  // },
 
   actions: {
     // ✅ LOGIN
@@ -31,34 +31,40 @@ export const useAuthStore = defineStore('auth', {
 
         return { success: true }
       } catch (error) {
-        const message =
-          error.response?.data?.detail ||
-          error.response?.data?.error ||
-          'Login failed'
-        return { success: false, error: message }
+        return {
+          success: false,
+          error: error.response?.data?.detail || 'Login failed'
+        }
       }
     },
 
     // ✅ REGISTER
-    async register(userData) {
+  async register(userData) {
       try {
-        const { data } = await axios.post(`${API_URL}/auth/register/`, userData)
+        const payload = {
+          username: userData.username,
+          email: userData.email,
+          password: userData.password
+        }
 
-        this.token = data.access
-        this.user = data.user
-        this.isAuthenticated = true
+        const { data } = await axios.post(
+          'http://127.0.0.1:8000/api/auth/register/',
+          payload
+        )
 
-        localStorage.setItem('token', this.token)
-        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
-
-        return { success: true }
+        return { success: true, data }
       } catch (error) {
-        const message =
-          error.response?.data?.username?.[0] ||
-          error.response?.data?.email?.[0] ||
-          error.response?.data?.error ||
-          'Registration failed'
-        return { success: false, error: message }
+        console.log("REGISTER ERROR:", error.response?.data)
+
+        return {
+          success: false,
+          error:
+            error.response?.data?.username?.[0] ||
+            error.response?.data?.email?.[0] ||
+            error.response?.data?.password?.[0] ||
+            JSON.stringify(error.response?.data) ||
+            'Registration failed'
+        }
       }
     },
 

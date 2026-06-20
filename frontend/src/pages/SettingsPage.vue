@@ -51,7 +51,7 @@
             <CurrencySelector v-model="store.ui.currency" :dark="$q.dark.isActive" @change="persist" />
           </q-item-section>
         </q-item>
-        
+
                 <q-separator :dark="$q.dark.isActive" inset />
 
             <q-item clickable v-ripple @click="openCategories">
@@ -70,7 +70,7 @@
             </q-item>
 
         <q-separator :dark="$q.dark.isActive" inset />
-      
+
         <q-item>
           <q-item-section avatar>
             <q-icon name="palette" class="list-icon" />
@@ -369,7 +369,7 @@ function openCategories () {
 
 async function fetchCategories () {
   try {
-    const res = await api.get('/categories/')
+    const res = await api.get('api/categories/')
     categories.value = res.data
   } catch (e) {
     $q.notify({ type: 'negative', message: 'Failed to load categories' })

@@ -4,9 +4,9 @@
     <div class="q-mt-sm q-mb-md flex justify-center">
       <div class="drag-handle" />
     </div>
-      
+
     <q-card-section class="row items-center">
-      
+
       <div class="text-h6 text-weight-bold">Add Transaction</div>
 
       <q-space />
@@ -45,13 +45,15 @@
         />
 
         <!-- Category -->
-        <q-select
+      <q-select
           v-model="form.category"
           :options="categoryOptions"
-          label="Category"
+          option-label="label"
+          option-value="value"
           emit-value
           map-options
           filled
+          label="Category"
           :loading="loadingCategories"
           :rules="[v => !!v || 'Category is required']"
         />
@@ -122,7 +124,7 @@
 
       </q-form>
     </q-card-section>
-      
+
   </q-card>
 </template>
 
@@ -133,7 +135,7 @@ import { useQuasar } from 'quasar'
 
 const emit = defineEmits(['saved', 'close'])
 const $q = useQuasar()
-  
+
 const loadingCategories = ref(false)
 const categoryOptions = ref([
   { label: 'Food & Groceries', value: 1 },
@@ -150,6 +152,7 @@ const categoryOptions = ref([
   { label: 'Investment', value: 12 },
   { label: 'Other', value: 99 }
 ])
+
 const invoiceInput = ref(null)
 const invoiceFile = ref(null)
 const invoiceName = ref('')
@@ -175,16 +178,34 @@ onMounted(fetchCategories)
 
 async function fetchCategories () {
   loadingCategories.value = true
+
   try {
     const res = await api.get('/categories/')
-    categoryOptions.value = res.data.map(c => ({
-    label: c.name,
-    value: c.id
-    }))
-    console.log('categoryOptions', categoryOptions.value)
+
+    console.log('Categories API:', res.data)
+
+    const categories = Array.isArray(res.data)
+      ? res.data
+      : (res.data.results || [])
+
+    if (categories.length > 0) {
+      categoryOptions.value = categories.map(c => ({
+        label: c.name,
+        value: c.id
+      }))
+    }
+
+    console.log('Loaded categories:', categoryOptions.value)
 
   } catch (e) {
-    $q.notify({ type: 'negative', message: 'Failed to load categories' })
+    console.error('Category API Error:', e)
+    console.log('Response:', e.response)
+    console.log('Data:', e.response?.data)
+
+    $q.notify({
+      type: 'warning',
+      message: 'Backend unavailable. Using default categories'
+    })
   } finally {
     loadingCategories.value = false
   }
